@@ -1,5 +1,6 @@
 package com.agentwaj.autoplay;
 
+import android.media.MediaPlayer;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,10 +20,12 @@ class MyAdapter extends BaseAdapter {
 
     private HttpProxyCacheServer proxy;
     private List<String> items;
+    private VideoTracker tracker;
 
-    MyAdapter(HttpProxyCacheServer proxy, List<String> items) {
+    MyAdapter(ViewGroup container, HttpProxyCacheServer proxy, List<String> items) {
         this.proxy = proxy;
         this.items = items;
+        tracker = new VideoTracker(container);
     }
 
     @Override
@@ -36,10 +39,24 @@ class MyAdapter extends BaseAdapter {
 
         switch (viewType) {
             case VIEW_TYPE_VIDEO:
+                final String description = "Item " + position;
+                ((TextView) convertView.findViewById(R.id.description)).setText(description);
+
                 final VideoView videoView = (VideoView) convertView.findViewById(R.id.video);
                 String source = "http://mirrors.standaloneinstaller.com/video-sample/lion-sample.3gp";
+
+                // https://stackoverflow.com/a/28485640
+                videoView.setVisibility(View.GONE);
+                videoView.setVisibility(View.VISIBLE);
+
                 videoView.setVideoPath(proxy.getProxyUrl(source));
                 videoView.start();
+                videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        tracker.startTracking(description, videoView);
+                    }
+                });
                 break;
             default:
                 ((TextView) convertView.findViewById(android.R.id.text1)).setText(items.get(position));
@@ -70,7 +87,7 @@ class MyAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        return position % 10 == 0 ? VIEW_TYPE_VIDEO : VIEW_TYPE_ARTICLE;
+        return position % 30 == 0 ? VIEW_TYPE_VIDEO : VIEW_TYPE_ARTICLE;
     }
 
     @Override

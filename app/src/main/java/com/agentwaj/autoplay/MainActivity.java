@@ -16,16 +16,17 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        ListView list = (ListView) findViewById(R.id.list);
         HttpProxyCacheServer proxy = new HttpProxyCacheServer(getApplicationContext());
         List<String> items = getItems();
 
-        ((ListView) findViewById(R.id.list)).setAdapter(new MyAdapter(proxy, items));
+        list.setAdapter(new MyAdapter(list, proxy, items));
     }
 
     private List<String> getItems() {
         List<String> items = new ArrayList<>();
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 1000; i++) {
             items.add("Item " + i);
         }
 
