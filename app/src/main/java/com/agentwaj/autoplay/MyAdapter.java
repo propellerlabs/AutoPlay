@@ -7,6 +7,8 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import android.widget.VideoView;
 
+import com.danikula.videocache.HttpProxyCacheServer;
+
 import java.util.List;
 
 class MyAdapter extends BaseAdapter {
@@ -15,9 +17,11 @@ class MyAdapter extends BaseAdapter {
     private static final int VIEW_TYPE_ARTICLE = 1;
     private static final int VIEW_TYPE_COUNT = 2;
 
+    private HttpProxyCacheServer proxy;
     private List<String> items;
 
-    MyAdapter(List<String> items) {
+    MyAdapter(HttpProxyCacheServer proxy, List<String> items) {
+        this.proxy = proxy;
         this.items = items;
     }
 
@@ -32,8 +36,9 @@ class MyAdapter extends BaseAdapter {
 
         switch (viewType) {
             case VIEW_TYPE_VIDEO:
-                VideoView videoView = (VideoView) convertView.findViewById(R.id.video);
-                videoView.setVideoPath("http://www.sample-videos.com/video/3gp/240/big_buck_bunny_240p_5mb.3gp");
+                final VideoView videoView = (VideoView) convertView.findViewById(R.id.video);
+                String source = "http://mirrors.standaloneinstaller.com/video-sample/lion-sample.3gp";
+                videoView.setVideoPath(proxy.getProxyUrl(source));
                 videoView.start();
                 break;
             default:

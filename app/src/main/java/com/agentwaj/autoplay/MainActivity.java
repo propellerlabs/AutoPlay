@@ -4,6 +4,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ListView;
 
+import com.danikula.videocache.HttpProxyCacheServer;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +16,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ((ListView) findViewById(R.id.list)).setAdapter(new MyAdapter(getItems()));
+        HttpProxyCacheServer proxy = new HttpProxyCacheServer(getApplicationContext());
+        List<String> items = getItems();
+
+        ((ListView) findViewById(R.id.list)).setAdapter(new MyAdapter(proxy, items));
     }
 
     private List<String> getItems() {
