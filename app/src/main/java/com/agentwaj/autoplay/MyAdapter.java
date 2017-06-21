@@ -72,7 +72,7 @@ class MyAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        return position % 30 == 0 ? VIEW_TYPE_VIDEO : VIEW_TYPE_ARTICLE;
+        return position % 20 == 0 ? VIEW_TYPE_VIDEO : VIEW_TYPE_ARTICLE;
     }
 
     @Override

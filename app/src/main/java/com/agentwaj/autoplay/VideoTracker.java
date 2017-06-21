@@ -17,6 +17,7 @@ import java.util.Map;
 class VideoTracker implements TextureView.SurfaceTextureListener {
 
     private static final String TAG = VideoTracker.class.getName();
+    private static final int VISIBLE_THRESHOLD = 70;
 
     private Map<String, TextureView> viewsToBeTracked;
     private Map<String, TextureView> viewsBeingTracked;
@@ -49,9 +50,9 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
                             (int) (((float) visibleArea) / viewArea * 100f);
                     log(key + " is " + visibleAreaPercent + "% visible");
 
-                    if (visibleAreaPercent < 50 && mediaPlayer.isPlaying()) {
+                    if (visibleAreaPercent < VISIBLE_THRESHOLD && mediaPlayer.isPlaying()) {
                         mediaPlayer.reset();
-                    } else if (visibleAreaPercent > 50 && !mediaPlayer.isPlaying()) {
+                    } else if (visibleAreaPercent >= VISIBLE_THRESHOLD && !mediaPlayer.isPlaying()) {
                         startMediaPlayer(textureView.getSurfaceTexture());
                     }
                 }
