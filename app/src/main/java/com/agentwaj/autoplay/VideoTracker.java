@@ -48,13 +48,18 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
                     int visibleAreaPercent = viewArea == 0 ? 0 :
                             (int) (((float) visibleArea) / viewArea * 100f);
                     log(key + " is " + visibleAreaPercent + "% visible");
+
+                    if (visibleAreaPercent < 50 && mediaPlayer.isPlaying()) {
+                        mediaPlayer.reset();
+                    } else if (visibleAreaPercent > 50 && !mediaPlayer.isPlaying()) {
+                        startMediaPlayer(textureView.getSurfaceTexture());
+                    }
                 }
             }
         });
     }
 
-    @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
+    private void startMediaPlayer(SurfaceTexture surfaceTexture) {
         String source = "http://mirrors.standaloneinstaller.com/video-sample/lion-sample.3gp";
         Surface surface = new Surface(surfaceTexture);
         try {
@@ -67,20 +72,22 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
             mediaPlayer.setDataSource(proxy.getProxyUrl(source));
             mediaPlayer.setSurface(surface);
             mediaPlayer.prepareAsync();
-//            mediaPlayer.setOnBufferingUpdateListener(this);
-//            mediaPlayer.setOnCompletionListener(this);
-//            mediaPlayer.setOnVideoSizeChangedListener(this);
+            mediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mp.start();
+                    updateTrackedViews();
                 }
             });
-            mediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
-            updateTrackedViews();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
+        startMediaPlayer(surfaceTexture);
     }
 
     @Override
@@ -100,8 +107,9 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
 
     private void updateTrackedViews() {
         for (String key : viewsToBeTracked.keySet()) {
-            viewsBeingTracked.put(key, viewsToBeTracked.remove(key));
+            viewsBeingTracked.put(key, viewsToBeTracked.get(key));
         }
+        viewsToBeTracked.clear();
     }
 
     void startTracking(final String key, final TextureView textureView) {
