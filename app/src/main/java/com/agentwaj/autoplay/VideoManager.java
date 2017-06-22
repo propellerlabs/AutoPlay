@@ -1,13 +1,17 @@
 package com.agentwaj.autoplay;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.TextView;
 
 import com.danikula.videocache.HttpProxyCacheServer;
 
@@ -53,8 +57,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
                     log(videoState.id + " is " + visibleAreaPercent + "% visible");
 
                     if (visibleAreaPercent < VISIBLE_THRESHOLD && mediaPlayer.isPlaying()) {
-                        videoState.position = mediaPlayer.getCurrentPosition();
-                        mediaPlayer.reset();
+                        pauseMediaPlayer(videoState);
                     } else if (visibleAreaPercent >= VISIBLE_THRESHOLD && !mediaPlayer.isPlaying()) {
                         videoState.shouldPlay = true;
                         prepareMediaPlayer(textureView.getSurfaceTexture());
@@ -97,6 +100,11 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         }
     }
 
+    private void pauseMediaPlayer(VideoState videoState) {
+        videoState.position = mediaPlayer.getCurrentPosition();
+        mediaPlayer.reset();
+    }
+
     private VideoState getVideoStateForId(String id) {
         for (VideoState videoState : trackedViews) {
             if (videoState.id.equals(id)) {
@@ -136,6 +144,14 @@ class VideoManager implements TextureView.SurfaceTextureListener {
             prepareMediaPlayer(textureView.getSurfaceTexture());
         }
         log(trackedViews.size() + " views are being tracked.");
+
+        final VideoState finalVideoState = videoState;
+        textureView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goFullscreen(v.getContext(), finalVideoState);
+            }
+        });
     }
 
     void stopTracking(final TextureView textureView) {
@@ -146,6 +162,15 @@ class VideoManager implements TextureView.SurfaceTextureListener {
                 videoState.shouldPlay = false;
             }
         }
+    }
+
+    private void goFullscreen(Context context, VideoState videoState) {
+        pauseMediaPlayer(videoState);
+        Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar);
+        dialog.setContentView(R.layout.fullscreen_video);
+        dialog.show();
+
+        ((TextView) dialog.findViewById(R.id.description)).setText(videoState.id);
     }
 
     @Override
