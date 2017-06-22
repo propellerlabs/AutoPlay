@@ -43,18 +43,12 @@ class VideoManager implements TextureView.SurfaceTextureListener {
                     }
                     TextureView textureView = videoState.textureView;
 
-                    Rect viewRect = new Rect();
-                    if (!textureView.getLocalVisibleRect(viewRect) || !textureView.isShown()) {
+                    int visibleAreaPercent = getVisibleAreaPercent(textureView);
+                    if (visibleAreaPercent == 0) {
                         log(videoState.id + " is not visible");
                         continue;
                     }
 
-                    int visibleWidth = viewRect.right - viewRect.left;
-                    int visibleHeight = viewRect.bottom - viewRect.top;
-                    int visibleArea = visibleWidth * visibleHeight;
-                    int viewArea = textureView.getWidth() * textureView.getHeight();
-                    int visibleAreaPercent = viewArea == 0 ? 0 :
-                            (int) (((float) visibleArea) / viewArea * 100f);
                     log(videoState.id + " is " + visibleAreaPercent + "% visible");
 
                     if (visibleAreaPercent < VISIBLE_THRESHOLD && mediaPlayer.isPlaying()) {
@@ -66,6 +60,19 @@ class VideoManager implements TextureView.SurfaceTextureListener {
                 }
             }
         });
+    }
+
+    private int getVisibleAreaPercent(TextureView textureView) {
+        Rect viewRect = new Rect();
+        if (!textureView.getLocalVisibleRect(viewRect) || !textureView.isShown()) {
+            return 0;
+        }
+
+        int visibleWidth = viewRect.right - viewRect.left;
+        int visibleHeight = viewRect.bottom - viewRect.top;
+        int visibleArea = visibleWidth * visibleHeight;
+        int viewArea = textureView.getWidth() * textureView.getHeight();
+        return viewArea == 0 ? 0 : (int) (((float) visibleArea) / viewArea * 100f);
     }
 
     private void prepareMediaPlayer(SurfaceTexture surfaceTexture) {
