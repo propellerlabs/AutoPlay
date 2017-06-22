@@ -56,14 +56,15 @@ class VideoManager implements TextureView.SurfaceTextureListener {
                         videoState.position = mediaPlayer.getCurrentPosition();
                         mediaPlayer.reset();
                     } else if (visibleAreaPercent >= VISIBLE_THRESHOLD && !mediaPlayer.isPlaying()) {
-                        startMediaPlayer(textureView.getSurfaceTexture());
+                        videoState.shouldPlay = true;
+                        prepareMediaPlayer(textureView.getSurfaceTexture());
                     }
                 }
             }
         });
     }
 
-    private void startMediaPlayer(SurfaceTexture surfaceTexture) {
+    private void prepareMediaPlayer(SurfaceTexture surfaceTexture) {
         final VideoState videoState = getVideoStateForSurfaceTexture(surfaceTexture);
         if (videoState == null) {
             return;
@@ -84,9 +85,11 @@ class VideoManager implements TextureView.SurfaceTextureListener {
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
-                    mp.seekTo(videoState.position);
-                    mp.start();
                     videoState.prepared = true;
+                    mp.seekTo(videoState.position);
+                    if (videoState.shouldPlay) {
+                        mp.start();
+                    }
                 }
             });
         } catch (Exception e) {
@@ -119,9 +122,35 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         return null;
     }
 
+    void startTracking(String id, String source, TextureView textureView) {
+        VideoState videoState = getVideoStateForId(id);
+        if (videoState == null) {
+            videoState = new VideoState(id, source, textureView);
+            trackedViews.add(videoState);
+        } else {
+            videoState.textureView = textureView;
+        }
+        // The SurfaceTexture may be available if the view is being recycled
+        if (textureView.isAvailable()) {
+            videoState.shouldPlay = false;
+            prepareMediaPlayer(textureView.getSurfaceTexture());
+        }
+        log(trackedViews.size() + " views are being tracked.");
+    }
+
+    void stopTracking(final TextureView textureView) {
+        for (VideoState videoState : trackedViews) {
+            if (videoState.textureView != null && videoState.textureView.equals(textureView)) {
+                videoState.textureView = null;
+                videoState.prepared = false;
+                videoState.shouldPlay = false;
+            }
+        }
+    }
+
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-        startMediaPlayer(surfaceTexture);
+        prepareMediaPlayer(surfaceTexture);
     }
 
     @Override
@@ -137,30 +166,6 @@ class VideoManager implements TextureView.SurfaceTextureListener {
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface) {
 
-    }
-
-    void startTracking(String id, String source, TextureView textureView) {
-        VideoState videoState = getVideoStateForId(id);
-        if (videoState == null) {
-            videoState = new VideoState(id, source, textureView);
-            trackedViews.add(videoState);
-        } else {
-            videoState.textureView = textureView;
-        }
-        // The SurfaceTexture may be available if the view is being recycled
-        if (textureView.isAvailable()) {
-            videoState.prepared = true;
-        }
-        log(trackedViews.size() + " views are being tracked.");
-    }
-
-    void stopTracking(final TextureView textureView) {
-        for (VideoState videoState : trackedViews) {
-            if (videoState.textureView != null && videoState.textureView.equals(textureView)) {
-                videoState.textureView = null;
-                videoState.prepared = false;
-            }
-        }
     }
 
     static void log(String message) {

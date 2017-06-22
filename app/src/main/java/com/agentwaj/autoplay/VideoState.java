@@ -8,6 +8,7 @@ class VideoState {
     String source;
     TextureView textureView;
     boolean prepared;
+    boolean shouldPlay;
     int position;
 
     VideoState(String id, String source, TextureView textureView) {
@@ -16,6 +17,7 @@ class VideoState {
         this.textureView = textureView;
 
         prepared = false;
+        shouldPlay = false;
         position = 0;
     }
 }
