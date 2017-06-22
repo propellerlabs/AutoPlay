@@ -109,7 +109,9 @@ class VideoManager implements TextureView.SurfaceTextureListener {
     }
 
     private void pauseMediaPlayer(VideoState videoState) {
-        videoState.position = mediaPlayer.getCurrentPosition();
+        if (mediaPlayer.isPlaying()) {
+            videoState.position = mediaPlayer.getCurrentPosition();
+        }
         mediaPlayer.reset();
     }
 
