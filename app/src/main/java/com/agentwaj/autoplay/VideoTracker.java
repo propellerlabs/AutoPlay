@@ -12,13 +12,12 @@ import android.view.ViewTreeObserver;
 import com.danikula.videocache.HttpProxyCacheServer;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 class VideoTracker implements TextureView.SurfaceTextureListener {
 
     private static final String TAG = VideoTracker.class.getName();
-    private static final int VISIBLE_THRESHOLD = 70;
+    private static final int VISIBLE_THRESHOLD = 50;
 
     private Set<VideoState> trackedViews;
     private HttpProxyCacheServer proxy;
@@ -34,14 +33,14 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
             public void onScrollChanged() {
                 for (VideoState videoState : trackedViews) {
                     if (!videoState.prepared) {
-                        log(videoState.description + " not prepared");
+                        log(videoState.id + " not prepared");
                         continue;
                     }
                     TextureView textureView = videoState.textureView;
 
                     Rect viewRect = new Rect();
                     if (!textureView.getLocalVisibleRect(viewRect) || !textureView.isShown()) {
-                        log(videoState.description + " is not visible");
+                        log(videoState.id + " is not visible");
                         continue;
                     }
 
@@ -51,7 +50,7 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
                     int viewArea = textureView.getWidth() * textureView.getHeight();
                     int visibleAreaPercent = viewArea == 0 ? 0 :
                             (int) (((float) visibleArea) / viewArea * 100f);
-                    log(videoState.description + " is " + visibleAreaPercent + "% visible");
+                    log(videoState.id + " is " + visibleAreaPercent + "% visible");
 
                     if (visibleAreaPercent < VISIBLE_THRESHOLD && mediaPlayer.isPlaying()) {
                         videoState.position = mediaPlayer.getCurrentPosition();
@@ -88,7 +87,7 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
                 public void onPrepared(MediaPlayer mp) {
                     mp.seekTo(videoState.position);
                     mp.start();
-                    updateTrackedViews();
+                    videoState.prepared = true;
                 }
             });
         } catch (Exception e) {
@@ -96,9 +95,9 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
         }
     }
 
-    private VideoState getVideoStateForTextureView(TextureView textureView) {
+    private VideoState getVideoStateForId(String id) {
         for (VideoState videoState : trackedViews) {
-            if (videoState.textureView.equals(textureView)) {
+            if (videoState.id.equals(id)) {
                 return videoState;
             }
         }
@@ -107,6 +106,9 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
 
     private VideoState getVideoStateForSurfaceTexture(SurfaceTexture surfaceTexture) {
         for (VideoState videoState : trackedViews) {
+            if (videoState.textureView == null) {
+                continue;
+            }
             SurfaceTexture currentSurfaceTexture = videoState.textureView.getSurfaceTexture();
             if (currentSurfaceTexture == null) {
                 continue;
@@ -138,28 +140,26 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
 
     }
 
-    private void updateTrackedViews() {
-        for (VideoState videoState : trackedViews) {
-            videoState.prepared = true;
+    void startTracking(String id, TextureView textureView) {
+        VideoState videoState = getVideoStateForId(id);
+        if (videoState == null) {
+            videoState = new VideoState(id, textureView);
+            trackedViews.add(videoState);
+        } else {
+            videoState.textureView = textureView;
         }
-    }
-
-    void startTracking(final String description, final TextureView textureView) {
-        if (getVideoStateForTextureView(textureView) == null) {
-            trackedViews.add(new VideoState(textureView, description));
+        // The SurfaceTexture may be available if the view is being recycled
+        if (textureView.isAvailable()) {
+            videoState.prepared = true;
         }
         log(trackedViews.size() + " views are being tracked.");
     }
 
     void stopTracking(final TextureView textureView) {
-        if (textureView == null) {
-            return;
-        }
-        Iterator<VideoState> it = trackedViews.iterator();
-        while (it.hasNext()) {
-            if (it.next().textureView.equals(textureView)) {
-                it.remove();
-                break;
+        for (VideoState videoState : trackedViews) {
+            if (videoState.textureView != null && videoState.textureView.equals(textureView)) {
+                videoState.textureView = null;
+                videoState.prepared = false;
             }
         }
     }

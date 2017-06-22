@@ -32,19 +32,26 @@ class MyAdapter extends BaseAdapter {
         log("Item " + position);
         int viewType = getItemViewType(position);
 
-        if (convertView == null || convertView.getTag() != (viewType + "")) {
+        if (convertView == null) {
             convertView = LayoutInflater.from(parent.getContext()).inflate(getLayout(viewType), parent, false);
-            convertView.setTag(viewType + "");
+            convertView.setTag(viewType);
+        } else {
+            TextureView textureView = (TextureView) convertView.findViewById(R.id.video);
+            tracker.stopTracking(textureView);
+            if (!convertView.getTag().equals(viewType)) {
+                convertView = LayoutInflater.from(parent.getContext()).inflate(getLayout(viewType), parent, false);
+                convertView.setTag(viewType);
+            }
         }
 
         switch (viewType) {
             case VIEW_TYPE_VIDEO:
-                String description = "Item " + position;
-                ((TextView) convertView.findViewById(R.id.description)).setText(description);
+                String id = "Item " + position;
+                ((TextView) convertView.findViewById(R.id.description)).setText(id);
 
                 TextureView textureView = (TextureView) convertView.findViewById(R.id.video);
                 textureView.setSurfaceTextureListener(tracker);
-                tracker.startTracking(description, textureView);
+                tracker.startTracking(id, textureView);
                 break;
             default:
                 ((TextView) convertView.findViewById(android.R.id.text1)).setText(items.get(position));

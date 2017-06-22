@@ -4,14 +4,14 @@ import android.view.TextureView;
 
 class VideoState {
 
+    String id;
     TextureView textureView;
-    String description;
     boolean prepared;
     int position;
 
-    VideoState(TextureView textureView, String description) {
+    VideoState(String id, TextureView textureView) {
+        this.id = id;
         this.textureView = textureView;
-        this.description = description;
 
         prepared = false;
         position = 0;
