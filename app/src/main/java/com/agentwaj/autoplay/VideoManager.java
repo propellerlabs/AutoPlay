@@ -159,7 +159,13 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         textureView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                goFullscreen(v.getContext(), finalVideoState);
+                if (!finalVideoState.isFullscreen) {
+                    goFullscreen(v.getContext(), finalVideoState);
+                } else if (mediaPlayer.isPlaying()) {
+                    pauseMediaPlayer(finalVideoState);
+                } else {
+                    prepareMediaPlayer(finalVideoState.textureView.getSurfaceTexture());
+                }
             }
         });
     }
@@ -175,6 +181,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
     }
 
     private void goFullscreen(Context context, final VideoState videoState) {
+        videoState.isFullscreen = true;
         pauseMediaPlayer(videoState);
         Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar);
         dialog.setContentView(R.layout.fullscreen_video);
@@ -185,6 +192,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
+                videoState.isFullscreen = false;
                 pauseMediaPlayer(videoState);
                 startTracking(videoState.id, videoState.source, previousTextureView);
             }

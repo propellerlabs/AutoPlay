@@ -9,6 +9,7 @@ class VideoState {
     TextureView textureView;
     boolean prepared;
     boolean shouldPlay;
+    boolean isFullscreen;
     int position;
 
     VideoState(String id, String source, TextureView textureView) {
