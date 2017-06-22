@@ -14,16 +14,16 @@ import com.danikula.videocache.HttpProxyCacheServer;
 import java.util.HashSet;
 import java.util.Set;
 
-class VideoTracker implements TextureView.SurfaceTextureListener {
+class VideoManager implements TextureView.SurfaceTextureListener {
 
-    private static final String TAG = VideoTracker.class.getName();
+    private static final String TAG = VideoManager.class.getName();
     private static final int VISIBLE_THRESHOLD = 50;
 
     private Set<VideoState> trackedViews;
     private HttpProxyCacheServer proxy;
     private MediaPlayer mediaPlayer;
 
-    VideoTracker(ViewGroup container, HttpProxyCacheServer proxy) {
+    VideoManager(ViewGroup container, HttpProxyCacheServer proxy) {
         this.proxy = proxy;
 
         trackedViews = new HashSet<>();
@@ -69,7 +69,6 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
             return;
         }
 
-        String source = "http://mirrors.standaloneinstaller.com/video-sample/lion-sample.3gp";
         Surface surface = new Surface(surfaceTexture);
         try {
             if (mediaPlayer != null) {
@@ -78,7 +77,7 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
                 mediaPlayer = null;
             }
             mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(proxy.getProxyUrl(source));
+            mediaPlayer.setDataSource(proxy.getProxyUrl(videoState.source));
             mediaPlayer.setSurface(surface);
             mediaPlayer.prepareAsync();
             mediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
@@ -140,10 +139,10 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
 
     }
 
-    void startTracking(String id, TextureView textureView) {
+    void startTracking(String id, String source, TextureView textureView) {
         VideoState videoState = getVideoStateForId(id);
         if (videoState == null) {
-            videoState = new VideoState(id, textureView);
+            videoState = new VideoState(id, source, textureView);
             trackedViews.add(videoState);
         } else {
             videoState.textureView = textureView;
