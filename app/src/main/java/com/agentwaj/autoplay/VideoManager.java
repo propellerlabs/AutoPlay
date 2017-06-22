@@ -2,6 +2,7 @@ package com.agentwaj.autoplay;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.media.MediaPlayer;
@@ -164,13 +165,28 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         }
     }
 
-    private void goFullscreen(Context context, VideoState videoState) {
+    private void goFullscreen(Context context, final VideoState videoState) {
         pauseMediaPlayer(videoState);
         Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar);
         dialog.setContentView(R.layout.fullscreen_video);
         dialog.show();
 
+        final TextureView previousTextureView = videoState.textureView;
+        stopTracking(previousTextureView);
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                pauseMediaPlayer(videoState);
+                startTracking(videoState.id, videoState.source, previousTextureView);
+            }
+        });
+
         ((TextView) dialog.findViewById(R.id.description)).setText(videoState.id);
+
+        videoState.shouldPlay = true;
+        TextureView textureView = (TextureView) dialog.findViewById(R.id.video);
+        textureView.setSurfaceTextureListener(this);
+        startTracking(videoState.id, videoState.source, textureView);
     }
 
     @Override
