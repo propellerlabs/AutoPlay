@@ -148,7 +148,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         }
         // The SurfaceTexture may be available if the view is being recycled
         if (textureView.isAvailable()) {
-            videoState.shouldPlay = false;
+            videoState.shouldPlay = getVisibleAreaPercent(textureView) >= VISIBLE_THRESHOLD;
             prepareMediaPlayer(textureView.getSurfaceTexture());
         }
         log(trackedViews.size() + " views are being tracked.");
