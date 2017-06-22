@@ -11,6 +11,8 @@ import com.danikula.videocache.HttpProxyCacheServer;
 
 import java.util.List;
 
+import static com.agentwaj.autoplay.VideoTracker.log;
+
 class MyAdapter extends BaseAdapter {
 
     private static final int VIEW_TYPE_VIDEO = 0;
@@ -27,6 +29,7 @@ class MyAdapter extends BaseAdapter {
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
+        log("Item " + position);
         int viewType = getItemViewType(position);
 
         if (convertView == null || convertView.getTag() != (viewType + "")) {
@@ -36,7 +39,7 @@ class MyAdapter extends BaseAdapter {
 
         switch (viewType) {
             case VIEW_TYPE_VIDEO:
-                final String description = "Item " + position;
+                String description = "Item " + position;
                 ((TextView) convertView.findViewById(R.id.description)).setText(description);
 
                 TextureView textureView = (TextureView) convertView.findViewById(R.id.video);

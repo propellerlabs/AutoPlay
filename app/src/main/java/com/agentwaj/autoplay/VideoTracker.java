@@ -96,6 +96,15 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
         }
     }
 
+    private VideoState getVideoStateForTextureView(TextureView textureView) {
+        for (VideoState videoState : trackedViews) {
+            if (videoState.textureView.equals(textureView)) {
+                return videoState;
+            }
+        }
+        return null;
+    }
+
     private VideoState getVideoStateForSurfaceTexture(SurfaceTexture surfaceTexture) {
         for (VideoState videoState : trackedViews) {
             SurfaceTexture currentSurfaceTexture = videoState.textureView.getSurfaceTexture();
@@ -136,7 +145,10 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
     }
 
     void startTracking(final String description, final TextureView textureView) {
-        trackedViews.add(new VideoState(textureView, description));
+        if (getVideoStateForTextureView(textureView) == null) {
+            trackedViews.add(new VideoState(textureView, description));
+        }
+        log(trackedViews.size() + " views are being tracked.");
     }
 
     void stopTracking(final TextureView textureView) {
@@ -152,7 +164,7 @@ class VideoTracker implements TextureView.SurfaceTextureListener {
         }
     }
 
-    private static void log(String message) {
+    static void log(String message) {
         Log.d(TAG, message);
     }
 }
