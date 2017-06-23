@@ -54,7 +54,7 @@ class MyAdapter extends BaseAdapter {
                 String source = position % 2 == 0 ?
                         "http://mirrors.standaloneinstaller.com/video-sample/lion-sample.3gp" :
                         "http://mirrors.standaloneinstaller.com/video-sample/page18-movie-4.3gp";
-                videoManager.startTracking(id, source, textureView);
+                videoManager.startTracking(id, source, textureView, false);
                 break;
             default:
                 ((TextView) convertView.findViewById(android.R.id.text1)).setText(items.get(position));

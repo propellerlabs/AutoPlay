@@ -140,7 +140,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         return null;
     }
 
-    void startTracking(String id, String source, TextureView textureView) {
+    void startTracking(String id, String source, TextureView textureView, boolean shouldPlay) {
         VideoState videoState = getVideoStateForId(id);
         if (videoState == null) {
             videoState = new VideoState(id, source, textureView);
@@ -150,7 +150,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         }
         // The SurfaceTexture may be available if the view is being recycled
         if (textureView.isAvailable()) {
-            videoState.shouldPlay = getVisibleAreaPercent(textureView) >= VISIBLE_THRESHOLD;
+            videoState.shouldPlay = shouldPlay;
             prepareMediaPlayer(textureView.getSurfaceTexture());
         }
         log(trackedViews.size() + " views are being tracked.");
@@ -162,8 +162,10 @@ class VideoManager implements TextureView.SurfaceTextureListener {
                 if (!finalVideoState.isFullscreen) {
                     goFullscreen(v.getContext(), finalVideoState);
                 } else if (mediaPlayer.isPlaying()) {
+                    finalVideoState.shouldPlay = false;
                     pauseMediaPlayer(finalVideoState);
                 } else {
+                    finalVideoState.shouldPlay = true;
                     prepareMediaPlayer(finalVideoState.textureView.getSurfaceTexture());
                 }
             }
@@ -194,7 +196,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
             public void onDismiss(DialogInterface dialog) {
                 videoState.isFullscreen = false;
                 pauseMediaPlayer(videoState);
-                startTracking(videoState.id, videoState.source, previousTextureView);
+                startTracking(videoState.id, videoState.source, previousTextureView, videoState.shouldPlay);
             }
         });
 
@@ -203,7 +205,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         videoState.shouldPlay = true;
         TextureView textureView = (TextureView) dialog.findViewById(R.id.video);
         textureView.setSurfaceTextureListener(this);
-        startTracking(videoState.id, videoState.source, textureView);
+        startTracking(videoState.id, videoState.source, textureView, true);
     }
 
     @Override
