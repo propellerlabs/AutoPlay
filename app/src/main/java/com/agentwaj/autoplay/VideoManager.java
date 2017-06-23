@@ -100,6 +100,11 @@ class VideoManager implements TextureView.SurfaceTextureListener {
                     mp.seekTo(videoState.position);
                     if (videoState.shouldPlay) {
                         mp.start();
+                        if (!videoState.hasOpenedFullscreen) {
+                            mp.setVolume(0, 0);
+                        } else {
+                            mp.setVolume(1, 1);
+                        }
                     }
                 }
             });
@@ -186,6 +191,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
 
     private void goFullscreen(Context context, final VideoState videoState) {
         videoState.isFullscreen = true;
+        videoState.hasOpenedFullscreen = true;
         pauseMediaPlayer(videoState);
         Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar);
         //noinspection ConstantConditions

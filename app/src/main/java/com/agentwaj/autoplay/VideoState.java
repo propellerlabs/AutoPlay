@@ -11,6 +11,7 @@ class VideoState {
     boolean shouldPlay;
     boolean isPaused;
     boolean isFullscreen;
+    boolean hasOpenedFullscreen;
     int position;
 
     VideoState(String id, String source, TextureView textureView) {
@@ -22,6 +23,7 @@ class VideoState {
         shouldPlay = false;
         isPaused = false;
         isFullscreen = false;
+        hasOpenedFullscreen = false;
         position = 0;
     }
 }
