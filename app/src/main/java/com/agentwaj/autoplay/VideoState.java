@@ -9,6 +9,7 @@ class VideoState {
     TextureView textureView;
     boolean prepared;
     boolean shouldPlay;
+    boolean isPaused;
     boolean isFullscreen;
     int position;
 
@@ -19,6 +20,8 @@ class VideoState {
 
         prepared = false;
         shouldPlay = false;
+        isPaused = false;
+        isFullscreen = false;
         position = 0;
     }
 }

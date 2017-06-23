@@ -53,7 +53,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
 
                     if (visibleAreaPercent < VISIBLE_THRESHOLD && mediaPlayer.isPlaying()) {
                         pauseMediaPlayer(videoState);
-                    } else if (visibleAreaPercent >= VISIBLE_THRESHOLD && !mediaPlayer.isPlaying()) {
+                    } else if (visibleAreaPercent >= VISIBLE_THRESHOLD && !mediaPlayer.isPlaying() && !videoState.isPaused) {
                         videoState.shouldPlay = true;
                         prepareMediaPlayer(textureView.getSurfaceTexture());
                     }
@@ -163,9 +163,11 @@ class VideoManager implements TextureView.SurfaceTextureListener {
                     goFullscreen(v.getContext(), finalVideoState);
                 } else if (mediaPlayer.isPlaying()) {
                     finalVideoState.shouldPlay = false;
+                    finalVideoState.isPaused = true;
                     pauseMediaPlayer(finalVideoState);
                 } else {
                     finalVideoState.shouldPlay = true;
+                    finalVideoState.isPaused = false;
                     prepareMediaPlayer(finalVideoState.textureView.getSurfaceTexture());
                 }
             }
@@ -205,6 +207,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         ((TextView) dialog.findViewById(R.id.description)).setText(videoState.id);
 
         videoState.shouldPlay = true;
+        videoState.isPaused = false;
         TextureView textureView = (TextureView) dialog.findViewById(R.id.video);
         textureView.setSurfaceTextureListener(this);
         startTracking(videoState.id, videoState.source, textureView, true);

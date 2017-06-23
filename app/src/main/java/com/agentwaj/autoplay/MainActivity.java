@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private List<String> getItems() {
         List<String> items = new ArrayList<>();
 
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 46; i++) {
             items.add("Item " + i);
         }
 
