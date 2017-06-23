@@ -12,6 +12,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.MediaController;
 import android.widget.TextView;
 
 import com.danikula.videocache.HttpProxyCacheServer;
@@ -19,7 +20,7 @@ import com.danikula.videocache.HttpProxyCacheServer;
 import java.util.HashSet;
 import java.util.Set;
 
-class VideoManager implements TextureView.SurfaceTextureListener {
+class VideoManager implements TextureView.SurfaceTextureListener, MediaController.MediaPlayerControl {
 
     private static final String TAG = VideoManager.class.getName();
     private static final int VISIBLE_THRESHOLD = 50;
@@ -27,6 +28,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
     private Set<VideoState> trackedViews;
     private HttpProxyCacheServer proxy;
     private MediaPlayer mediaPlayer;
+    private MediaController mediaController;
 
     VideoManager(ViewGroup container, HttpProxyCacheServer proxy) {
         this.proxy = proxy;
@@ -89,6 +91,7 @@ class VideoManager implements TextureView.SurfaceTextureListener {
                 mediaPlayer = null;
             }
             mediaPlayer = new MediaPlayer();
+            mediaController = new MediaController(videoState.textureView.getContext(), false);
             mediaPlayer.setDataSource(proxy.getProxyUrl(videoState.source));
             mediaPlayer.setSurface(surface);
             mediaPlayer.prepareAsync();
@@ -105,6 +108,13 @@ class VideoManager implements TextureView.SurfaceTextureListener {
                         } else {
                             mp.setVolume(1, 1);
                         }
+                    }
+
+                    if (videoState.isFullscreen) {
+                        mediaController.setMediaPlayer(VideoManager.this);
+                        mediaController.setAnchorView(videoState.textureView);
+                        mediaController.setEnabled(true);
+                        mediaController.show();
                     }
                 }
             });
@@ -217,6 +227,61 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         TextureView textureView = (TextureView) dialog.findViewById(R.id.video);
         textureView.setSurfaceTextureListener(this);
         startTracking(videoState.id, videoState.source, textureView, true);
+    }
+
+    @Override
+    public void start() {
+        // TODO
+    }
+
+    @Override
+    public void pause() {
+        // TODO
+    }
+
+    @Override
+    public int getDuration() {
+        return mediaPlayer.getDuration();
+    }
+
+    @Override
+    public int getCurrentPosition() {
+        return mediaPlayer.getCurrentPosition();
+    }
+
+    @Override
+    public void seekTo(int pos) {
+        mediaPlayer.seekTo(pos);
+    }
+
+    @Override
+    public boolean isPlaying() {
+        return true;
+    }
+
+    @Override
+    public int getBufferPercentage() {
+        return 100; // TODO
+    }
+
+    @Override
+    public boolean canPause() {
+        return true;
+    }
+
+    @Override
+    public boolean canSeekBackward() {
+        return false;
+    }
+
+    @Override
+    public boolean canSeekForward() {
+        return false;
+    }
+
+    @Override
+    public int getAudioSessionId() {
+        return 0;
     }
 
     @Override
