@@ -186,6 +186,8 @@ class VideoManager implements TextureView.SurfaceTextureListener {
         videoState.isFullscreen = true;
         pauseMediaPlayer(videoState);
         Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar);
+        //noinspection ConstantConditions
+        dialog.getWindow().getAttributes().windowAnimations = android.R.style.Animation_Dialog;
         dialog.setContentView(R.layout.fullscreen_video);
         dialog.show();
 
