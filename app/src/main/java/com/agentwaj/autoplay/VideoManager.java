@@ -115,6 +115,9 @@ class VideoManager implements TextureView.SurfaceTextureListener, MediaControlle
                         mediaController.setAnchorView(videoState.textureView);
                         mediaController.setEnabled(true);
                         mediaController.show();
+                        ((ViewGroup) mediaController.getParent()).removeView(mediaController);
+                        ((ViewGroup) videoState.textureView.getRootView().findViewById(R.id.media_controller_wrapper))
+                                .addView(mediaController);
                     }
                 }
             });
@@ -128,6 +131,9 @@ class VideoManager implements TextureView.SurfaceTextureListener, MediaControlle
             videoState.position = mediaPlayer.getCurrentPosition();
         }
         mediaPlayer.reset();
+        if (mediaController != null) {
+            ((ViewGroup) mediaController.getParent()).removeView(mediaController);
+        }
     }
 
     private VideoState getVideoStateForId(String id) {
