@@ -114,7 +114,7 @@ class VideoManager implements TextureView.SurfaceTextureListener, MediaControlle
                         mediaController.setMediaPlayer(VideoManager.this);
                         mediaController.setAnchorView(videoState.textureView);
                         mediaController.setEnabled(true);
-                        mediaController.show();
+                        mediaController.show(0);
                         ((ViewGroup) mediaController.getParent()).removeView(mediaController);
                         ((ViewGroup) videoState.textureView.getRootView().findViewById(R.id.media_controller_wrapper))
                                 .addView(mediaController);
